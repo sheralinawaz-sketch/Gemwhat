@@ -3,6 +3,7 @@ import json
 import urllib.request
 import os
 from flask import Flask, request
+import google.generativeai as genai
 
 app = Flask(__name__)
 
@@ -11,7 +12,6 @@ PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN")
 
-import google.generativeai as genai
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
@@ -26,7 +26,7 @@ def send_whatsapp_message(to_number, message_body):
         "to": to_number,
         "text": {"body": message_body}
     }
-    req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers, method='POST')
+    req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
     try:
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
@@ -39,7 +39,7 @@ def send_whatsapp_message(to_number, message_body):
         print(f"Error sending message: {e}")
     return None
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/webhook", methods=["GET", "POST"])
 def webhook():
     if request.method == "GET":
         mode = request.args.get("hub.mode")
