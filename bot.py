@@ -1,14 +1,14 @@
 import ssl
 import json
 import urllib.request
-from flask import Flask, request, jsonify
+from flask import Flask, request
 import google.generativeai as genai
 
 app = Flask(__name__)
 
-GEMINI_API_KEY = "AQ.Ab8RN6ILJ3iCP"
-PHONE_NUMBER_ID = "153782487608190"
-WHATSAPP_TOKEN = "EAAVZAAkizhmOBTP"
+GEMINI_API_KEY = "AQ.Ab8RN6ILJ3iCPgnJkf2Cvi99VjUj5p7RqXsqMap6XHH_Er0xkQ"
+PHONE_NUMBER_ID = "1537824876081909"
+WHATSAPP_TOKEN = "EAAVZAAkizhm0BTPbkEnlZB7m18a2g9IzQXxMCJXdl4XHQXxbWfACqpIPhcnt43bbZCq4ZBljgwgxkd1uDEZC9F6ljuqEibLsuk60fswByx7u9ZC1wFOBpNccZCsp5L1TMXZABonazwVMO1st4HfbAP1rUrKnINt8vLn9CDSUVe3OZB9wPMbuZC3jOxSfZATwomKH8Qx0Ta8RO4dqns3M3R4eZB6qd1xd3Ec0IKKFhiWQ2RecUAKh4k4vDm054AORFC1RF1LlnlQkAX7i9zt94R2HtvUt4yJ3"
 VERIFY_TOKEN = "sherali_secure_token"
 
 genai.configure(api_key=GEMINI_API_KEY)
@@ -31,12 +31,16 @@ def send_whatsapp_message(to_number, message_body):
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
         with urllib.request.urlopen(req, context=ctx) as response:
-            return response.read().decode('utf-8')
+            return response.read()
     except urllib.error.HTTPError as e:
-        print(f"HTTP Error: {e.read().decode('utf-8')}")
+        print(f"HTTP Error: {e.read()}")
     except Exception as e:
         print(f"Error sending message: {e}")
     return None
+
+@app.route("/", methods=["GET"])
+def home():
+    return "Bot is running perfectly!", 200
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -65,7 +69,7 @@ def webhook():
                 send_whatsapp_message(sender_phone, bot_reply)
         except (KeyError, IndexError):
             pass
-        return jsonify({"status": "ok"}), 200
+        return json.dumps({"status": "ok"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
